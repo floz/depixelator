@@ -21,8 +21,8 @@ var Main = Main || ( function () {
 	function createScene() {
 		_canvas = document.createElement( "canvas" );
 		_canvas.setAttribute( "id", "tree" );
-		_canvas.width = 111;
-		_canvas.height = 205;
+		_canvas.width = 211;
+		_canvas.height = 305;
 		$( "body" ).append( _canvas );
 
 		_ctx = _canvas.getContext( "2d" );
@@ -58,32 +58,39 @@ var Main = Main || ( function () {
 	}
 
 	function showImage() {
-		var delay = 0, x = 0, y = 0;
+		var delay = 0, x = 0, y = 0, dx = 0, dyFromBot = 0, dyFromMid = 0, percent = 0;
 		for( var i = 0, n = _pixels.length; i < n; i++ ) {
 			pixel = _pixels[ i ];
-			x = pixel.x;
-			y = pixel.y;
+			x = pixel.x + 50;
+			y = pixel.y + 100;
+			dx = 105 - x;
+			dyFromMid = 202 - y;
+			dyFromBot = 305 - y;
+			percent = dyFromBot / 305;
 
 			TweenLite.set( pixel, { 
-				a: 0, 
-				x: x + ( Math.random() * 60 - 30 ),
-				y: y + ( Math.random() * 60 - 30 )
+				a: 0
+				, x: x// - dx + Math.random() * 10 - 5//x + ( Math.random() * 60 - 30 ),
+				, y: y - dyFromMid * .5 + Math.random() * 10 - 5//( Math.random() * 60 - 30 )
+				, scale: .75
 			} );
 
 			delay = Math.random() * .25
-			TweenLite.to( pixel, .1, {
-				delay: delay,
+			TweenLite.to( pixel, .15, {
+				delay: .5 * percent,
 				a: .8,
 				x: pixel.x + ( x - pixel.x ) * .8,
 				y: pixel.y + ( y - pixel.y ) * .8,
+				scale: 2.3,
 				ease: Sine.easeIn
 			})
-			TweenLite.to( pixel, .25, { 
-				delay: .1 + delay,
+			TweenLite.to( pixel, .34, { 
+				delay: .15 + .5 * percent,
 				a: 1,
 				x: x,
 				y: y,
-				ease: Cubic.easeOut
+				scale: 1,
+				ease: Expo.easeOut
 			} );
 			// delay += .01;
 		}
@@ -92,18 +99,21 @@ var Main = Main || ( function () {
 	}
 
 	function update() {
-		_ctx.fillStyle = "#ffffff";
+		_ctx.fillStyle = "rgba( 255, 255, 255, .8 )";
 		_ctx.fillRect( 0, 0, _canvas.width, _canvas.height );
 
 		var pixel = null;
 		for( var i = 0, n = _pixels.length; i < n; i++ ) {
 			pixel = _pixels[ i ];
 			
+			// _ctx.save();
+			// _ctx.scale( pixel.scale, pixel.scale );
 			_ctx.beginPath();
 			_ctx.fillStyle = "rgba( " + pixel.r + ", " + pixel.g + ", " + pixel.b + ", " + pixel.a + " )";
-			_ctx.rect( pixel.x, pixel.y, pixel.w, pixel.h );
+			_ctx.rect( pixel.x - pixel.w * pixel.scale * .5, pixel.y - pixel.w * pixel.scale * .5, pixel.w * pixel.scale, pixel.h * pixel.scale );
 			_ctx.fill();
 			_ctx.closePath();
+			// _ctx.restore();
 		}
 
 		requestAnimationFrame( update );
@@ -124,6 +134,7 @@ var Pixel = ( function Pixel() {
 		this.g = g;
 		this.b = b;
 		this.a = a / 255;
+		this.scale = 1;
 	}
 	Pixel.prototype.constructor = Pixel;
 
